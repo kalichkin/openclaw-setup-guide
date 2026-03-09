@@ -1,6 +1,6 @@
 # How to Set Up Your Own AI Assistant (OpenClaw) — Guide From Scratch
 
-> **🤖 For Claude Code:** This file is a step-by-step guide for installing OpenClaw on a VPS. You can execute it automatically. Ask the user to provide: (1) SSH access to the server (IP + key or password), (2) Anthropic API key, (3) Telegram bot token and Telegram ID. Then execute steps 2-4 sequentially via SSH. Steps 0 and 1 should be done by the user themselves (registrations and accounts).
+> **🤖 For Claude Code:** This file is a step-by-step guide for installing OpenClaw on a VPS. You can execute it automatically. Ask the user to provide: (1) SSH access to the server (IP + key or password), (2) their chosen auth method (Anthropic OAuth, OpenAI OAuth, or API key), (3) Telegram bot token and Telegram ID. Then execute steps 2-4 sequentially via SSH. Steps 0 and 1 should be done by the user themselves (registrations and accounts).
 
 ---
 
@@ -16,7 +16,7 @@ Read this guide: https://github.com/kalichkin/openclaw-setup-guide
 
 Connect to my server via SSH (root@MY_IP) and execute steps 2-4.
 Here's my info:
-- Anthropic API key: sk-ant-...
+- Auth method: [see Step 0.1 below]
 - Telegram bot token: 71234...:AAH...
 - My Telegram ID: 123456789
 ```
@@ -29,10 +29,10 @@ Here's my info:
 
 This guide will take you from absolute zero to a working AI assistant available 24/7 via Telegram on your phone.
 
-**What you'll get:** An AI assistant (Claude) that lives on your server, accessible through a Telegram bot. You can message it from your phone anywhere in the world. It can work with files, run code, execute scheduled tasks, and much more.
+**What you'll get:** An AI assistant (Claude or GPT) that lives on your server, accessible through a Telegram bot. You can message it from your phone anywhere in the world. It can work with files, run code, execute scheduled tasks, and much more.
 
 **Time:** ~45-60 minutes manually (with Claude Code: ~15 minutes)  
-**Cost:** ~$5/mo for the server + ~$10-30/mo for AI model API  
+**Cost:** ~$5/mo for the server + AI model access (see auth options below)  
 **Skill level:** Copy-pasting commands into a terminal is enough
 
 ---
@@ -45,7 +45,7 @@ This guide will take you from absolute zero to a working AI assistant available 
 │📱      │── Telegram message ────>│ OpenClaw Gateway     │
 │Phone   │                        │   │                  │
 │        │<── response ───────────│   ↓                  │
-└────────┘                        │ Claude (Anthropic AI) │
+└────────┘                        │ AI Model (Claude/GPT)│
                                   └──────────────────────┘
 ```
 
@@ -57,17 +57,72 @@ OpenClaw is an open-source bridge between messengers and AI. It runs on your ser
 
 Get these ready before you begin:
 
-### 0.1. Anthropic API Key
+### 0.1. AI Model Access (Choose One)
 
-This key gives access to Claude (the AI model). Without it, OpenClaw can't "think."
+You need access to an AI model. OpenClaw supports multiple providers and auth methods. **Pick the one that fits your situation:**
 
+---
+
+#### Option A: Anthropic OAuth (Claude Max/Pro subscription) ⭐ Recommended
+
+**Best for:** People who already have (or want) a Claude Pro ($20/mo) or Max ($100/mo) subscription.
+
+**How it works:** You authenticate OpenClaw with your existing Claude subscription via a setup-token. No separate API billing.
+
+**Cost:** Your existing subscription fee. No extra charges.
+
+**What you need:**
+1. A Claude Pro or Max subscription at [claude.ai](https://claude.ai)
+2. Claude Code CLI installed on your computer ([claude.ai/download](https://claude.ai/download))
+3. Run `claude setup-token` in your terminal — this generates a token you'll paste during OpenClaw setup
+
+**⚠️ TOS Note:** Anthropic's terms of service for using consumer subscriptions in third-party tools have been evolving. As of early 2026, Anthropic has stated that nothing changes around how customers have been using their accounts and will not be canceling accounts. However, if you want the cleanest terms-of-service compliance, consider Option C (API key). See [Anthropic's latest position](https://docs.openclaw.ai/providers/anthropic) for current status.
+
+---
+
+#### Option B: OpenAI OAuth (ChatGPT/Codex subscription) ⭐ Also Recommended
+
+**Best for:** People who already have (or want) a ChatGPT Plus ($20/mo) or Pro ($200/mo) subscription.
+
+**How it works:** You authenticate OpenClaw with your existing ChatGPT/Codex subscription via OAuth. No separate API billing.
+
+**Cost:** Your existing subscription fee. No extra charges.
+
+**What you need:**
+1. A ChatGPT Plus or Pro subscription at [chatgpt.com](https://chatgpt.com)
+2. During OpenClaw setup, choose "OpenAI Codex" auth — the wizard will guide you through OAuth login
+
+**TOS Note:** OpenAI explicitly supports using subscription OAuth in external tools and workflows like OpenClaw. This is the cleanest subscription-based option from a terms-of-service perspective.
+
+---
+
+#### Option C: API Key (Pay-As-You-Go) 💰
+
+**Best for:** Cleanest terms-of-service compliance. You pay only for what you use, directly through the provider's API.
+
+**Providers:** Anthropic API, OpenAI API, or others (Google Gemini, etc.)
+
+**How it works:** You get an API key from the provider and pay per token used. No subscription needed.
+
+**Cost:** Usage-based. For a personal assistant, typically **$10-50/mo** depending on how much you use it. Can be significantly more expensive than a subscription if you use it heavily (especially with large-context models like Claude Opus).
+
+**What you need (Anthropic):**
 1. Go to [console.anthropic.com](https://console.anthropic.com)
 2. Sign up (or log in)
 3. Add a payment method (Settings → Billing)
 4. Go to Settings → API Keys → Create Key
 5. Copy the key (starts with `sk-ant-...`) — **save it, it's shown only once!**
 
-Cost: pay-as-you-go. For a personal assistant, typically $10-30/mo.
+**What you need (OpenAI):**
+1. Go to [platform.openai.com](https://platform.openai.com)
+2. Sign up (or log in)
+3. Add a payment method (Settings → Billing)
+4. Go to API Keys → Create new secret key
+5. Copy the key (starts with `sk-...`) — **save it, it's shown only once!**
+
+**Why choose this over OAuth?** The API is the officially supported way to build on top of AI models. There's zero ambiguity about terms of service. If you're planning heavy or commercial use, this is the right choice.
+
+---
 
 ### 0.2. Telegram Bot
 
@@ -178,13 +233,32 @@ The script will install Node.js (if needed) and OpenClaw. Takes 2-3 minutes.
 
 ### 2.3. Run the Setup Wizard
 
+The setup command depends on which auth method you chose in Step 0.1:
+
+**Option A — Anthropic OAuth (setup-token):**
 ```bash
-openclaw onboard --install-daemon
+openclaw onboard --install-daemon --auth-choice setup-token
+```
+When prompted, paste the token you generated with `claude setup-token` on your computer.
+
+**Option B — OpenAI OAuth (Codex subscription):**
+```bash
+openclaw onboard --install-daemon --auth-choice openai-codex
+```
+The wizard will guide you through the OAuth login flow.
+
+**Option C — Anthropic API key:**
+```bash
+openclaw onboard --install-daemon --auth-choice apiKey
+```
+When prompted, paste your API key from Step 0.1.
+
+**Option C — OpenAI API key:**
+```bash
+openclaw onboard --install-daemon --openai-api-key "YOUR_API_KEY"
 ```
 
-The wizard will ask a few things:
-- **API provider:** choose Anthropic
-- **API key:** paste your key from Step 0.1
+For all options:
 - **Install as service:** Yes (to keep it running 24/7)
 - Leave other settings at their defaults
 
@@ -235,7 +309,7 @@ openclaw gateway restart
 
 ### 3.3. Test It
 
-Open Telegram, find your bot, and send it a message. If everything is set up correctly, it will respond via Claude!
+Open Telegram, find your bot, and send it a message. If everything is set up correctly, it will respond!
 
 ---
 
@@ -243,7 +317,9 @@ Open Telegram, find your bot, and send it a message. If everything is set up cor
 
 A few settings to keep your server secure:
 
-### 4.1. API Keys in .env (Not in Config)
+### 4.1. API Keys in .env (Not in Config) — API key users only
+
+If you used an API key (Option C), move it out of the config:
 
 ```bash
 nano ~/.openclaw/.env
@@ -254,12 +330,15 @@ Add:
 ```
 ANTHROPIC_API_KEY=sk-ant-your-key-here
 ```
+(or `OPENAI_API_KEY=sk-your-key-here` for OpenAI)
 
 Then remove the key from `openclaw.json` (OpenClaw will pick it up from `.env` automatically).
 
 ```bash
 chmod 600 ~/.openclaw/.env
 ```
+
+OAuth users (Options A and B): your auth tokens are managed automatically by OpenClaw. No `.env` changes needed.
 
 ### 4.2. Firewall
 
@@ -302,6 +381,21 @@ You now have:
 
 ---
 
+## Auth Method Comparison
+
+| | Anthropic OAuth | OpenAI OAuth | API Key (either) |
+|---|---|---|---|
+| **Cost** | Claude Pro $20/mo or Max $100/mo | ChatGPT Plus $20/mo or Pro $200/mo | Pay-per-use ($10-50+/mo typical) |
+| **TOS clarity** | Evolving (currently allowed) | Explicitly supported | Fully supported, no ambiguity |
+| **Setup complexity** | Need Claude Code CLI for setup-token | OAuth flow in wizard | Paste a key |
+| **Best model** | Claude Opus 4.6 | GPT-5.4 | Your choice |
+| **Billing** | Flat subscription | Flat subscription | Usage-based (can spike) |
+| **Prompt caching** | Not available | N/A | Available (saves cost) |
+
+**Our recommendation:** Start with OAuth (Option A or B) if you already have a subscription. Switch to API key if you need cleaner TOS compliance or want prompt caching.
+
+---
+
 ## About OpenClaw Security (For the Skeptics)
 
 A fair question when installing an open-source project with shell access.
@@ -332,7 +426,9 @@ A fair question when installing an open-source project with shell access.
 | Discord | [discord.com/invite/clawd](https://discord.com/invite/clawd) |
 | Security | [trust.openclaw.ai](https://trust.openclaw.ai) |
 | VPS Guides | [docs.openclaw.ai/vps](https://docs.openclaw.ai/vps) |
-| Claude Code | [code.claude.com](https://code.claude.com) |
+| Claude Code | [claude.ai/download](https://claude.ai/download) |
+| Anthropic Provider Docs | [docs.openclaw.ai/providers/anthropic](https://docs.openclaw.ai/providers/anthropic) |
+| OpenAI Provider Docs | [docs.openclaw.ai/providers/openai](https://docs.openclaw.ai/providers/openai) |
 
 ---
 
@@ -355,6 +451,13 @@ journalctl -u openclaw-gateway -n 50   # logs
 - Check that your ID is in `allowFrom` (as a string!)
 - Check `openclaw gateway status`
 - Check logs: `journalctl -u openclaw-gateway -f`
+
+**OAuth token expired (Anthropic)**
+- Re-run `claude setup-token` on your computer
+- Then on the server: `openclaw models auth paste-token --provider anthropic`
+
+**OAuth token expired (OpenAI)**
+- On the server: `openclaw models auth login --provider openai-codex`
 
 **Hetzner won't verify your account**
 Try DigitalOcean ($6/mo) or Oracle Cloud (free tier). Installation steps are the same.
