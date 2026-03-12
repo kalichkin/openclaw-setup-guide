@@ -1,29 +1,6 @@
-# How to Set Up Your Own AI Assistant (OpenClaw) — Guide From Scratch
+# How to Set Up Your Own AI Assistant (OpenClaw)
 
-> **🤖 For Claude Code:** This file is a step-by-step guide for installing OpenClaw on a VPS. You can execute it automatically. Ask the user to provide: (1) SSH access to the server (IP + key or password), (2) their chosen auth method (Anthropic OAuth, OpenAI OAuth, or API key), (3) Telegram bot token and Telegram ID. Then execute steps 2-4 sequentially via SSH. Steps 0 and 1 should be done by the user themselves (registrations and accounts).
-
----
-
-## Quick Path (if you have Claude Code)
-
-If you already have Claude Code installed and a VPS rented:
-
-1. Open Claude Code: `claude`
-2. Tell it:
-
-```
-Read this guide: https://github.com/kalichkin/openclaw-setup-guide
-
-Connect to my server via SSH (root@MY_IP) and execute steps 2-4.
-Here's my info:
-- Auth method: [see Step 0.1 below]
-- Telegram bot token: 71234...:AAH...
-- My Telegram ID: 123456789
-```
-
-3. Claude Code will do the rest. If something goes wrong, it will show the error and suggest a fix.
-
-**If you don't have Claude Code, read the full guide below.**
+> **🤖 For Claude Code:** This file is a step-by-step guide for installing OpenClaw on a VPS. You can execute it automatically. Ask the user to provide: (1) SSH access to the server (IP + key or password), (2) their chosen auth method (Anthropic OAuth, OpenAI OAuth, or API key), (3) Telegram bot token and Telegram ID. Then execute the installation sequentially via SSH: update the system, install OpenClaw, run the setup wizard, configure Telegram, set up basic security. Steps 1 through 3 should be done by the user themselves (registrations and accounts).
 
 ---
 
@@ -31,9 +8,10 @@ This guide will take you from absolute zero to a working AI assistant available 
 
 **What you'll get:** An AI assistant (Claude or GPT) that lives on your server, accessible through a Telegram bot. You can message it from your phone anywhere in the world. It can work with files, run code, execute scheduled tasks, and much more.
 
-**Time:** ~45-60 minutes manually (with Claude Code: ~15 minutes)  
+**Here's the plan:** Install Claude Code on your computer, set up a few accounts, rent a cheap server, then let Claude Code handle all the technical stuff. Total time: about 15 minutes of your effort, plus some waiting.
+
 **Cost:** ~$5/mo for the server + AI model access (see auth options below)  
-**Skill level:** Copy-pasting commands into a terminal is enough
+**Skill level:** Zero technical experience needed. Seriously.
 
 ---
 
@@ -53,17 +31,47 @@ OpenClaw is an open-source bridge between messengers and AI. It runs on your ser
 
 ---
 
-## Step 0. What You'll Need Before Starting
+## Step 1. Install Claude Code
 
-Get these ready before you begin:
+Claude Code is an AI assistant that runs in your terminal. You'll use it to handle the entire server setup automatically. Think of it as hiring a tech person who works inside your command line.
 
-### 0.1. AI Model Access (Choose One)
+### 1.1. Open Your Terminal
+
+- **macOS:** Press Cmd+Space, type "Terminal", hit Enter
+- **Windows:** Install [Windows Terminal](https://apps.microsoft.com/detail/9N0DX20HK701) from the Microsoft Store. Then install WSL2: open PowerShell as admin and run `wsl --install`. After restarting, you'll have a Linux terminal
+- **Linux:** You already know :)
+
+Yes, it's a black screen with text. No, it won't bite. You'll be surprised how quickly the terminal starts feeling natural. Think of it as texting your computer instead of clicking buttons. You type something, it responds. That's it.
+
+### 1.2. Install Claude Code
+
+Go to [claude.ai/download](https://claude.ai/download) and follow the instructions for your system. The short version:
+
+```bash
+npm install -g @anthropic-ai/claude-code
+```
+
+If you don't have `npm`, install Node.js first from [nodejs.org](https://nodejs.org) (pick the LTS version, click through the installer).
+
+After installing, run:
+
+```bash
+claude
+```
+
+Claude Code will ask you to log in. Follow the prompts. Once you see it respond to you, you're set.
+
+> **Don't have a Claude subscription yet?** That's fine. You'll set up AI model access in the next step, and Claude Code will work once you have it. You can also use Claude Code with an API key if you prefer.
+
+---
+
+## Step 2. Get AI Model Access (Choose One)
 
 You need access to an AI model. OpenClaw supports multiple providers and auth methods. **Pick the one that fits your situation:**
 
 ---
 
-#### Option A: Anthropic OAuth (Claude Max/Pro subscription) ⭐ Recommended
+### Option A: Anthropic OAuth (Claude Max/Pro subscription) ⭐ Recommended
 
 **Best for:** People who already have (or want) a Claude Pro ($20/mo) or Max ($100/mo) subscription.
 
@@ -73,14 +81,14 @@ You need access to an AI model. OpenClaw supports multiple providers and auth me
 
 **What you need:**
 1. A Claude Pro or Max subscription at [claude.ai](https://claude.ai)
-2. Claude Code CLI installed on your computer ([claude.ai/download](https://claude.ai/download))
-3. Run `claude setup-token` in your terminal — this generates a token you'll paste during OpenClaw setup
+2. Claude Code CLI installed on your computer (you just did this in Step 1!)
+3. Run `claude setup-token` in your terminal. This generates a token you'll use later. **Copy it and save it somewhere.**
 
 **⚠️ TOS Note:** Anthropic's terms of service for using consumer subscriptions in third-party tools have been evolving. As of early 2026, Anthropic has stated that nothing changes around how customers have been using their accounts and will not be canceling accounts. However, if you want the cleanest terms-of-service compliance, consider Option C (API key). See [Anthropic's latest position](https://docs.openclaw.ai/providers/anthropic) for current status.
 
 ---
 
-#### Option B: OpenAI OAuth (ChatGPT/Codex subscription) ⭐ Also Recommended
+### Option B: OpenAI OAuth (ChatGPT/Codex subscription) ⭐ Also Recommended
 
 **Best for:** People who already have (or want) a ChatGPT Plus ($20/mo) or Pro ($200/mo) subscription.
 
@@ -90,13 +98,13 @@ You need access to an AI model. OpenClaw supports multiple providers and auth me
 
 **What you need:**
 1. A ChatGPT Plus or Pro subscription at [chatgpt.com](https://chatgpt.com)
-2. During OpenClaw setup, choose "OpenAI Codex" auth — the wizard will guide you through OAuth login
+2. During OpenClaw setup, choose "OpenAI Codex" auth. The wizard will guide you through OAuth login
 
 **TOS Note:** OpenAI explicitly supports using subscription OAuth in external tools and workflows like OpenClaw. This is the cleanest subscription-based option from a terms-of-service perspective.
 
 ---
 
-#### Option C: API Key (Pay-As-You-Go) 💰
+### Option C: API Key (Pay-As-You-Go) 💰
 
 **Best for:** Cleanest terms-of-service compliance. You pay only for what you use, directly through the provider's API.
 
@@ -111,29 +119,31 @@ You need access to an AI model. OpenClaw supports multiple providers and auth me
 2. Sign up (or log in)
 3. Add a payment method (Settings → Billing)
 4. Go to Settings → API Keys → Create Key
-5. Copy the key (starts with `sk-ant-...`) — **save it, it's shown only once!**
+5. Copy the key (starts with `sk-ant-...`). **Save it, it's shown only once!**
 
 **What you need (OpenAI):**
 1. Go to [platform.openai.com](https://platform.openai.com)
 2. Sign up (or log in)
 3. Add a payment method (Settings → Billing)
 4. Go to API Keys → Create new secret key
-5. Copy the key (starts with `sk-...`) — **save it, it's shown only once!**
+5. Copy the key (starts with `sk-...`). **Save it, it's shown only once!**
 
 **Why choose this over OAuth?** The API is the officially supported way to build on top of AI models. There's zero ambiguity about terms of service. If you're planning heavy or commercial use, this is the right choice.
 
 ---
 
-### 0.2. Telegram Bot
+## Step 3. Create a Telegram Bot
+
+### 3.1. Create the Bot
 
 1. Open Telegram, find [@BotFather](https://t.me/BotFather)
 2. Send `/newbot`
 3. Choose a name for your bot (e.g., "My AI Assistant")
-4. Choose a username for your bot (e.g., `my_ai_assistant_bot`) — must end with `bot`
-5. BotFather will give you a **token** — a long string like `7123456789:AAH...`. Save it
+4. Choose a username for your bot (e.g., `my_ai_assistant_bot`). Must end with `bot`
+5. BotFather will give you a **token**, a long string like `7123456789:AAH...`. Save it
 6. To let the bot read messages in groups, send BotFather: `/setprivacy`, select your bot, choose `Disable`
 
-### 0.3. Find Your Telegram ID
+### 3.2. Find Your Telegram ID
 
 1. Open Telegram, find [@userinfobot](https://t.me/userinfobot)
 2. Send it anything
@@ -141,25 +151,21 @@ You need access to an AI model. OpenClaw supports multiple providers and auth me
 
 This ID is needed for the allowlist, so only you can message the bot.
 
-### 0.4. Terminal on Your Computer
-
-- **macOS:** Spotlight → "Terminal" (or iTerm2 if you have it)
-- **Windows:** Install [Windows Terminal](https://apps.microsoft.com/detail/9N0DX20HK701) from the Microsoft Store. Then install WSL2: open PowerShell as admin and run `wsl --install`. After restarting, you'll have a Linux terminal
-- **Linux:** You already know :)
-
 ---
 
-## Step 1. Rent a Server on Hetzner
+## Step 4. Rent a Server on Hetzner
 
-### 1.1. Create an Account
+You need a small, cheap server where your AI assistant will live. Hetzner is a reliable European hosting provider with good prices.
+
+### 4.1. Create an Account
 
 1. Go to [hetzner.com/cloud](https://www.hetzner.com/cloud/)
 2. Click "Sign Up" (or "Get Started")
 3. Complete the registration, confirm your email
 4. Add a payment method (card or PayPal)
-5. You may need identity verification (passport/ID) — Hetzner takes KYC seriously. Usually approved within a few hours
+5. You may need identity verification (passport/ID). Hetzner takes KYC seriously. Usually approved within a few hours
 
-### 1.2. Create an SSH Key (if you don't have one)
+### 4.2. Create an SSH Key (if you don't have one)
 
 An SSH key is a secure way to connect to your server without a password. Set it up once and forget about it.
 
@@ -187,179 +193,68 @@ cat ~/.ssh/id_ed25519.pub
 
 Copy the entire line starting with `ssh-ed25519 ...`
 
-### 1.3. Create the Server
+### 4.3. Create the Server
 
 1. In Hetzner Cloud Console, click **"Create Server"**
 2. **Location:** Choose the nearest region (Falkenstein or Helsinki for EU; Ashburn for US)
 3. **Image:** Ubuntu 24.04
-4. **Type:** Shared vCPU → **CX22** (2 vCPU, 4GB RAM) — ~€4.50/mo (~$5). More than enough
-5. **SSH Key:** Click "Add SSH Key", paste your public key (from step 1.2)
+4. **Type:** Shared vCPU → **CX22** (2 vCPU, 4GB RAM), about €4.50/mo (~$5). More than enough
+5. **SSH Key:** Click "Add SSH Key", paste your public key (from step 4.2)
 6. **Name:** Give it a name (e.g., `ai-assistant`)
 7. Click **"Create & Buy Now"**
 
 The server will be ready in about 30 seconds. Note the **IP address** (visible in the dashboard).
 
-### 1.4. Connect to the Server
-
-```bash
-ssh root@YOUR_IP_ADDRESS
-```
-
-If asked "Are you sure you want to continue connecting?" type `yes`.
-
-**You're in.** You should see a prompt like `root@ai-assistant:~#`
+**That's it for the manual work.** Don't SSH into the server yourself. Claude Code will take it from here.
 
 ---
 
-## Step 2. Install OpenClaw on the Server
+## Step 5. Let Claude Code Do the Rest
 
-You're now connected to the server via SSH. All commands below run on the server.
+This is the fun part. You've done all the prep work (accounts, keys, server). Now you hand it off.
 
-### 2.1. Update the System
+### 5.1. Open Claude Code
 
-```bash
-apt update && apt upgrade -y
-```
-
-Wait a couple of minutes for everything to update.
-
-### 2.2. Install OpenClaw
+Go back to your terminal and run:
 
 ```bash
-curl -fsSL https://openclaw.ai/install.sh | bash
+claude
 ```
 
-The script will install Node.js (if needed) and OpenClaw. Takes 2-3 minutes.
+### 5.2. Tell It What to Do
 
-### 2.3. Run the Setup Wizard
-
-The setup command depends on which auth method you chose in Step 0.1:
-
-**Option A — Anthropic OAuth (setup-token):**
-```bash
-openclaw onboard --install-daemon --auth-choice setup-token
-```
-When prompted, paste the token you generated with `claude setup-token` on your computer.
-
-**Option B — OpenAI OAuth (Codex subscription):**
-```bash
-openclaw onboard --install-daemon --auth-choice openai-codex
-```
-The wizard will guide you through the OAuth login flow.
-
-**Option C — Anthropic API key:**
-```bash
-openclaw onboard --install-daemon --auth-choice apiKey
-```
-When prompted, paste your API key from Step 0.1.
-
-**Option C — OpenAI API key:**
-```bash
-openclaw onboard --install-daemon --openai-api-key "YOUR_API_KEY"
-```
-
-For all options:
-- **Install as service:** Yes (to keep it running 24/7)
-- Leave other settings at their defaults
-
-### 2.4. Verify It Works
-
-```bash
-openclaw gateway status
-```
-
-Should show that the gateway is running and listening.
-
----
-
-## Step 3. Connect Telegram
-
-### 3.1. Edit the Config
-
-Open the config file:
-
-```bash
-nano ~/.openclaw/openclaw.json
-```
-
-Find (or add) the `channels` section and add Telegram:
-
-```json
-{
-  "channels": {
-    "telegram": {
-      "token": "PASTE_YOUR_BOTFATHER_TOKEN",
-      "allowFrom": ["PASTE_YOUR_TELEGRAM_ID"]
-    }
-  }
-}
-```
-
-**Important:**
-- `token` — the string from BotFather (Step 0.2)
-- `allowFrom` — an array of strings (!) with your Telegram ID from Step 0.3
-
-Save the file: `Ctrl+O`, Enter, `Ctrl+X`
-
-### 3.2. Restart the Gateway
-
-```bash
-openclaw gateway restart
-```
-
-### 3.3. Test It
-
-Open Telegram, find your bot, and send it a message. If everything is set up correctly, it will respond!
-
----
-
-## Step 4. Basic Security
-
-A few settings to keep your server secure:
-
-### 4.1. API Keys in .env (Not in Config) — API key users only
-
-If you used an API key (Option C), move it out of the config:
-
-```bash
-nano ~/.openclaw/.env
-```
-
-Add:
+Paste something like this (fill in your actual info):
 
 ```
-ANTHROPIC_API_KEY=sk-ant-your-key-here
-```
-(or `OPENAI_API_KEY=sk-your-key-here` for OpenAI)
+Read this guide: https://github.com/kalichkin/openclaw-setup-guide
 
-Then remove the key from `openclaw.json` (OpenClaw will pick it up from `.env` automatically).
+Connect to my server via SSH (root@YOUR_IP_ADDRESS) and install OpenClaw.
 
-```bash
-chmod 600 ~/.openclaw/.env
-```
+Here's my info:
+- Auth method: [Anthropic OAuth / OpenAI OAuth / API key]
+- Setup token or API key: [your token or key from Step 2]
+- Telegram bot token: [your token from Step 3.1]
+- My Telegram ID: [your ID from Step 3.2]
 
-OAuth users (Options A and B): your auth tokens are managed automatically by OpenClaw. No `.env` changes needed.
-
-### 4.2. Firewall
-
-```bash
-apt install -y ufw
-ufw default deny incoming
-ufw default allow outgoing
-ufw allow ssh
-ufw enable
+Install OpenClaw, configure Telegram, and set up basic security (firewall, auto-updates).
 ```
 
-This will block all incoming ports except SSH. The gateway listens on localhost by default, so it's already not accessible from outside.
+### 5.3. Watch It Work
 
-### 4.3. Automatic Security Updates
+Claude Code will:
+1. Connect to your server via SSH
+2. Update the system
+3. Install OpenClaw
+4. Run the setup wizard with your auth method
+5. Configure Telegram (bot token + your ID in the allowlist)
+6. Set up the firewall and automatic security updates
+7. Verify everything works
 
-```bash
-apt install -y unattended-upgrades
-dpkg-reconfigure -plow unattended-upgrades
-```
+If something goes wrong, Claude Code will show you the error and suggest a fix. You can just say "yes, fix it" and it will handle it.
 
-Choose "Yes" — the system will automatically install security patches.
+### 5.4. Test It
+
+Once Claude Code says it's done, open Telegram, find your bot, and send it a message. If everything is set up correctly, it will respond!
 
 ---
 
@@ -376,7 +271,7 @@ You now have:
 - **Web interface:** From your laptop, run `ssh -L 18789:127.0.0.1:18789 root@YOUR_IP` and open `http://127.0.0.1:18789/` in your browser
 - **WhatsApp:** Run `openclaw channels login` on the server and scan the QR code
 - **Discord:** Add a Discord bot token to the config
-- **Customization:** Set up a workspace, agents, skills — [docs.openclaw.ai](https://docs.openclaw.ai)
+- **Customization:** Set up a workspace, agents, skills. See [docs.openclaw.ai](https://docs.openclaw.ai)
 - **Security audit:** `openclaw security audit` will show what can be improved
 
 ---
@@ -403,7 +298,7 @@ A fair question when installing an open-source project with shell access.
 **Facts:**
 - Code is fully open: [github.com/openclaw/openclaw](https://github.com/openclaw/openclaw) (MIT license)
 - No telemetry, no "phone home," no cloud dependency
-- Data lives only on your VPS — the only external traffic is API calls to the model (Anthropic/OpenAI), which you'd be making anyway
+- Data lives only on your VPS. The only external traffic is API calls to the model (Anthropic/OpenAI), which you'd be making anyway
 - Formal Threat Model based on the MITRE ATLAS framework
 - Built-in security audit: `openclaw security audit --deep`
 - Active community (Discord) + security contact (trust.openclaw.ai)
@@ -414,6 +309,162 @@ A fair question when installing an open-source project with shell access.
 - OpenClaw: your data on your server, your rules, you control everything
 
 **A dedicated VPS for $5/mo is the security model itself.** Even if a bug is found in OpenClaw, it would only affect an isolated server with nothing on it but the assistant.
+
+---
+
+## Appendix: Manual Installation (Without Claude Code)
+
+If you prefer to do everything yourself, or if Claude Code runs into issues, here are the full manual steps. This covers what Claude Code does automatically in Step 5.
+
+### A.1. Connect to the Server
+
+```bash
+ssh root@YOUR_IP_ADDRESS
+```
+
+If asked "Are you sure you want to continue connecting?" type `yes`.
+
+You should see a prompt like `root@ai-assistant:~#`. You're in.
+
+### A.2. Update the System
+
+```bash
+apt update && apt upgrade -y
+```
+
+Wait a couple of minutes for everything to update.
+
+### A.3. Install OpenClaw
+
+```bash
+curl -fsSL https://openclaw.ai/install.sh | bash
+```
+
+The script will install Node.js (if needed) and OpenClaw. Takes 2-3 minutes.
+
+### A.4. Run the Setup Wizard
+
+The setup command depends on which auth method you chose in Step 2:
+
+**Option A, Anthropic OAuth (setup-token):**
+```bash
+openclaw onboard --install-daemon --auth-choice setup-token
+```
+When prompted, paste the token you generated with `claude setup-token` on your computer.
+
+**Option B, OpenAI OAuth (Codex subscription):**
+```bash
+openclaw onboard --install-daemon --auth-choice openai-codex
+```
+The wizard will guide you through the OAuth login flow.
+
+**Option C, Anthropic API key:**
+```bash
+openclaw onboard --install-daemon --auth-choice apiKey
+```
+When prompted, paste your API key from Step 2.
+
+**Option C, OpenAI API key:**
+```bash
+openclaw onboard --install-daemon --openai-api-key "YOUR_API_KEY"
+```
+
+For all options:
+- **Install as service:** Yes (to keep it running 24/7)
+- Leave other settings at their defaults
+
+### A.5. Verify It Works
+
+```bash
+openclaw gateway status
+```
+
+Should show that the gateway is running and listening.
+
+### A.6. Configure Telegram
+
+Open the config file:
+
+```bash
+nano ~/.openclaw/openclaw.json
+```
+
+Find (or add) the `channels` section and add Telegram:
+
+```json
+{
+  "channels": {
+    "telegram": {
+      "token": "PASTE_YOUR_BOTFATHER_TOKEN",
+      "allowFrom": ["PASTE_YOUR_TELEGRAM_ID"]
+    }
+  }
+}
+```
+
+**Important:**
+- `token` is the string from BotFather (Step 3.1)
+- `allowFrom` is an array of strings (!) with your Telegram ID from Step 3.2
+
+Save the file: `Ctrl+O`, Enter, `Ctrl+X`
+
+### A.7. Restart the Gateway
+
+```bash
+openclaw gateway restart
+```
+
+### A.8. Test It
+
+Open Telegram, find your bot, and send it a message. If everything is set up correctly, it will respond!
+
+### A.9. Basic Security
+
+A few settings to keep your server secure:
+
+**API Keys in .env (not in config), for API key users only:**
+
+If you used an API key (Option C), move it out of the config:
+
+```bash
+nano ~/.openclaw/.env
+```
+
+Add:
+
+```
+ANTHROPIC_API_KEY=sk-ant-your-key-here
+```
+(or `OPENAI_API_KEY=sk-your-key-here` for OpenAI)
+
+Then remove the key from `openclaw.json` (OpenClaw will pick it up from `.env` automatically).
+
+```bash
+chmod 600 ~/.openclaw/.env
+```
+
+OAuth users (Options A and B): your auth tokens are managed automatically by OpenClaw. No `.env` changes needed.
+
+**Firewall:**
+
+```bash
+apt install -y ufw
+ufw default deny incoming
+ufw default allow outgoing
+ufw allow ssh
+ufw enable
+```
+
+This will block all incoming ports except SSH. The gateway listens on localhost by default, so it's already not accessible from outside.
+
+**Automatic Security Updates:**
+
+```bash
+apt install -y unattended-upgrades
+dpkg-reconfigure -plow unattended-upgrades
+```
+
+Choose "Yes". The system will automatically install security patches.
 
 ---
 
